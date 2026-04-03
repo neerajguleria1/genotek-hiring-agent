@@ -4,3 +4,4 @@ supabase
 groq
 python-dotenv
 pydantic
+python-multipart
