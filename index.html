@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GenoTek Hiring Agent</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --border: #2a2d3e;
+    --accent: #6c63ff;
+    --accent2: #00d4aa;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --danger: #ff4d6d;
+    --success: #00d4aa;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+  /* NAV */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 40px; background: var(--surface);
+    border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+    width: 100%;
+  }
+  .logo { font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
+  .logo span { color: var(--accent2); }
+  .nav-tabs { display: flex; gap: 8px; }
+  .nav-tab {
+    padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer;
+    background: transparent; color: var(--muted); font-size: 14px; font-weight: 500;
+    transition: all 0.2s;
+  }
+  .nav-tab:hover { color: var(--text); background: var(--border); }
+  .nav-tab.active { background: var(--accent); color: #fff; }
+
+  /* PAGES */
+  .page { display: none; padding: 40px; max-width: 960px; width: 100%; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* HERO */
+  .hero { text-align: center; margin-bottom: 40px; }
+  .hero h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { color: var(--muted); font-size: 15px; }
+
+  /* CARD */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px; margin-bottom: 24px;
+  }
+  .card h2 { font-size: 18px; font-weight: 600; margin-bottom: 24px; color: var(--text); }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 13px; color: var(--muted); font-weight: 500; }
+  input, textarea {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; color: var(--text); font-size: 14px; outline: none;
+    transition: border 0.2s;
+  }
+  input:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+
+  /* SLIDER */
+  .slider-group { display: flex; flex-direction: column; gap: 6px; }
+  .slider-label { display: flex; justify-content: space-between; }
+  .slider-label span:last-child { color: var(--accent); font-weight: 600; }
+  input[type=range] {
+    -webkit-appearance: none; width: 100%; height: 6px;
+    background: var(--border); border-radius: 3px; border: none; padding: 0;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px;
+    background: var(--accent); border-radius: 50%; cursor: pointer;
+  }
+
+  /* BUTTON */
+  .btn {
+    padding: 12px 28px; border-radius: 10px; border: none; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #5a52e0; transform: translateY(-1px); }
+  .btn-secondary { background: var(--border); color: var(--text); }
+  .btn-secondary:hover { background: #3a3d50; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; padding: 14px 20px;
+    border-radius: 10px; font-size: 14px; font-weight: 500; z-index: 999;
+    transform: translateY(100px); opacity: 0; transition: all 0.3s;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: #0d3d30; border: 1px solid var(--success); color: var(--success); }
+  .toast.error { background: #3d0d1a; border: 1px solid var(--danger); color: var(--danger); }
+
+  /* LEADERBOARD */
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; width: 100%; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; text-align: center;
+  }
+  .stat-card .value { font-size: 28px; font-weight: 700; color: var(--accent); }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  thead th:nth-child(1) { width: 60px; }
+  thead th:nth-child(2) { width: 20%; }
+  thead th:nth-child(3) { width: 25%; }
+  thead th:nth-child(4) { width: 90px; }
+  thead th:nth-child(5) { width: 100px; }
+  thead th:nth-child(6) { width: 110px; }
+  tbody td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  thead th {
+    text-align: left; padding: 12px 16px; font-size: 12px;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr:hover { background: rgba(108, 99, 255, 0.05); }
+  tbody td { padding: 14px 16px; font-size: 14px; }
+  .rank { font-weight: 700; color: var(--muted); }
+  .rank.top { color: var(--accent2); }
+  .score-badge {
+    display: inline-block; padding: 4px 10px; border-radius: 20px;
+    font-size: 12px; font-weight: 600;
+  }
+  .score-high { background: rgba(0,212,170,0.15); color: var(--accent2); }
+  .score-mid { background: rgba(108,99,255,0.15); color: var(--accent); }
+  .score-low { background: rgba(255,77,109,0.15); color: var(--danger); }
+  .verdict-badge {
+    display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+  }
+  .verdict-strong { background: rgba(0,212,170,0.15); color: var(--accent2); }
+  .verdict-average { background: rgba(108,99,255,0.15); color: var(--accent); }
+  .verdict-weak { background: rgba(255,77,109,0.15); color: var(--danger); }
+  .btn-interview {
+    padding: 6px 14px; border-radius: 6px; border: 1px solid var(--accent);
+    background: transparent; color: var(--accent); font-size: 12px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-interview:hover { background: var(--accent); color: #fff; }
+  .btn-hire {
+    padding: 5px 10px; border-radius: 6px; border: 1px solid var(--success);
+    background: transparent; color: var(--success); font-size: 12px;
+    cursor: pointer; transition: all 0.2s; margin-right: 4px;
+  }
+  .btn-hire:hover { background: var(--success); color: #000; }
+  .btn-reject {
+    padding: 5px 10px; border-radius: 6px; border: 1px solid var(--danger);
+    background: transparent; color: var(--danger); font-size: 12px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-reject:hover { background: var(--danger); color: #fff; }
+  .empty { text-align: center; padding: 40px; color: var(--muted); }
+
+  /* INTERVIEW */
+  .interview-setup { margin-bottom: 24px; display: flex; gap: 12px; align-items: flex-end; }
+  .interview-setup .form-group { flex: 1; }
+  .chat-box {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; height: calc(100vh - 380px); min-height: 320px; overflow-y: auto;
+    padding: 20px; display: flex; flex-direction: column; gap: 16px;
+    margin-bottom: 16px;
+  }
+  .chat-box::-webkit-scrollbar { width: 4px; }
+  .chat-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .msg { display: flex; gap: 10px; max-width: 80%; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 32px; height: 32px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 13px;
+    font-weight: 700; flex-shrink: 0;
+  }
+  .msg.bot .msg-avatar { background: rgba(108,99,255,0.2); color: var(--accent); }
+  .msg.user .msg-avatar { background: rgba(0,212,170,0.2); color: var(--accent2); }
+  .msg-bubble {
+    padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.6;
+  }
+  .msg.bot .msg-bubble { background: var(--surface); border: 1px solid var(--border); border-top-left-radius: 4px; }
+  .msg.user .msg-bubble { background: var(--accent); color: #fff; border-top-right-radius: 4px; }
+  .chat-input-row { display: flex; gap: 10px; }
+  .chat-input-row input { flex: 1; }
+  .typing { color: var(--muted); font-size: 13px; font-style: italic; padding: 4px 0; }
+
+  .placeholder-msg {
+    text-align: center; color: var(--muted); font-size: 14px;
+    margin: auto; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  /* RESPONSIVE - TABLET */
+  @media (max-width: 768px) {
+    nav { padding: 12px 16px; gap: 8px; flex-wrap: wrap; }
+    .nav-tabs { width: 100%; justify-content: center; }
+    .nav-tab { padding: 7px 14px; font-size: 13px; flex: 1; text-align: center; }
+    .page { padding: 16px; }
+    .hero { margin-bottom: 24px; }
+    .hero h1 { font-size: 24px; }
+    .hero p { font-size: 13px; }
+    .card { padding: 20px; border-radius: 12px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.full { grid-column: 1; }
+    .stats-row { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .stat-card { padding: 12px 8px; }
+    .stat-card .value { font-size: 20px; }
+    .stat-card .label { font-size: 11px; }
+    .interview-setup { flex-direction: column; align-items: stretch; }
+    .interview-setup .btn { width: 100%; }
+    .chat-box { height: calc(100vh - 460px); min-height: 240px; }
+    .msg { max-width: 90%; }
+    /* Replace table with cards on mobile */
+    table, thead, tbody, th, td, tr { display: block; }
+    thead { display: none; }
+    tbody tr {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; margin: 8px 12px; padding: 12px 14px;
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    }
+    tbody tr:hover { background: rgba(108,99,255,0.05); }
+    tbody td {
+      padding: 0; border: none; white-space: normal;
+      overflow: visible; text-overflow: unset;
+    }
+    tbody td:nth-child(1) { font-size: 12px; color: var(--muted); width: 100%; }
+    tbody td:nth-child(2) { font-weight: 600; font-size: 15px; flex: 1; }
+    tbody td:nth-child(3) { display: none; }
+    tbody td:nth-child(4) { margin-left: auto; }
+    tbody td:nth-child(5) { width: 100%; }
+    tbody td:nth-child(6) { width: 100%; }
+    .btn-interview { width: 100%; text-align: center; padding: 8px; }
+  }
+  /* RESPONSIVE - MOBILE */
+  @media (max-width: 480px) {
+    .logo { font-size: 15px; }
+    .nav-tab { font-size: 11px; padding: 6px 8px; }
+    .hero h1 { font-size: 20px; }
+    .stats-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat-card .value { font-size: 18px; }
+    .stat-card .label { font-size: 10px; }
+    .card { padding: 16px; }
+    .chat-box { height: calc(100vh - 480px); min-height: 200px; }
+    .msg-bubble { font-size: 13px; padding: 10px 12px; }
+    .toast { left: 16px; right: 16px; bottom: 16px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Geno<span>Tek</span> Hiring</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('submit')">Submit Candidate</button>
+    <button class="nav-tab" onclick="showPage('leaderboard')">Leaderboard</button>
+    <button class="nav-tab" onclick="showPage('interview')">Interview</button>
+  </div>
+</nav>
+
+<!-- SUBMIT PAGE -->
+<div class="page active" id="page-submit">
+  <div class="hero">
+    <h1>Add <span>Candidate</span></h1>
+    <p>Submit applicant details for automatic scoring and ranking</p>
+  </div>
+  <div class="card">
+    <h2>Candidate Details</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="name" placeholder="e.g. Neeraj Guleria" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="e.g. neeraj@gmail.com" />
+      </div>
+      <div class="form-group slider-group">
+        <div class="slider-label">
+          <label>Python Skills</label>
+          <span id="python-val">5</span>
+        </div>
+        <input type="range" min="1" max="10" value="5" id="python_skills"
+          oninput="document.getElementById('python-val').textContent=this.value" />
+      </div>
+      <div class="form-group slider-group">
+        <div class="slider-label">
+          <label>AI/ML Experience</label>
+          <span id="aiml-val">5</span>
+        </div>
+        <input type="range" min="1" max="10" value="5" id="ai_ml_experience"
+          oninput="document.getElementById('aiml-val').textContent=this.value" />
+      </div>
+      <div class="form-group slider-group full">
+        <div class="slider-label">
+          <label>Communication</label>
+          <span id="comm-val">5</span>
+        </div>
+        <input type="range" min="1" max="10" value="5" id="communication"
+          oninput="document.getElementById('comm-val').textContent=this.value" />
+      </div>
+      <div class="form-group full">
+        <label>Resume Summary</label>
+        <textarea id="resume_summary" placeholder="Brief summary of experience, skills, and projects..."></textarea>
+      </div>
+    </div>
+    <br/>
+    <button class="btn btn-primary" onclick="submitCandidate()">Submit & Score Candidate</button>
+  </div>
+
+  <div class="card">
+    <h2>Bulk Upload via CSV</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Upload a CSV with columns: <code style="color:var(--accent)">name, email, python_skills, ai_ml_experience, communication, resume_summary</code></p>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <input type="file" id="csv-file" accept=".csv" style="flex:1;min-width:200px;" />
+      <button class="btn btn-primary" onclick="uploadCSV()">Upload & Score All</button>
+    </div>
+    <div id="csv-result" style="margin-top:12px;font-size:13px;color:var(--muted);"></div>
+  </div>
+</div>
+
+<!-- LEADERBOARD PAGE -->
+<div class="page" id="page-leaderboard">
+  <div class="hero">
+    <h1><span>Ranked</span> Candidates</h1>
+    <p>All applicants ranked by composite score</p>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="value" id="stat-total">0</div>
+      <div class="label">Total Candidates</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="stat-avg">0</div>
+      <div class="label">Average Score</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="stat-top">—</div>
+      <div class="label">Top Candidate</div>
+    </div>
+  </div>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+      <h2 style="margin:0">Leaderboard</h2>
+      <button class="btn btn-secondary" style="padding:8px 16px; font-size:13px;" onclick="loadLeaderboard()">↻ Refresh</button>
+    </div>
+    <div id="leaderboard-body" style="padding: 8px 0;">
+      <div class="empty">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<!-- INTERVIEW PAGE -->
+<div class="page" id="page-interview">
+  <div class="hero">
+    <h1>AI <span>Interview</span></h1>
+    <p>Autonomous multi-round interview powered by Llama 3.3</p>
+  </div>
+  <div class="card">
+    <div class="interview-setup">
+      <div class="form-group">
+        <label>Candidate ID</label>
+        <input type="text" id="interview-candidate-id" placeholder="Paste candidate ID from leaderboard" />
+      </div>
+      <button class="btn btn-secondary" onclick="startInterview()">Start Interview</button>
+    </div>
+    <div class="chat-box" id="chat-box">
+      <div class="placeholder-msg">
+        <div class="icon">🤖</div>
+        <div>Enter a candidate ID and click Start Interview</div>
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Type your answer..." onkeydown="if(event.key==='Enter') sendMessage()" disabled />
+      <button class="btn btn-primary" id="send-btn" onclick="sendMessage()" disabled>Send</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'http://127.0.0.1:8000';
+let activeCandidateId = null;
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'leaderboard') loadLeaderboard();
+}
+
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function submitCandidate() {
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  if (!name || !email) return toast('Name and email are required', 'error');
+
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'Submitting...';
+
+  try {
+    const res = await fetch(`${API}/candidates`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name, email,
+        python_skills: +document.getElementById('python_skills').value,
+        ai_ml_experience: +document.getElementById('ai_ml_experience').value,
+        communication: +document.getElementById('communication').value,
+        resume_summary: document.getElementById('resume_summary').value
+      })
+    });
+    const data = await res.json();
+    toast(`✓ ${data.candidate.name} scored ${data.candidate.score}/10`);
+    document.getElementById('name').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('resume_summary').value = '';
+  } catch (e) {
+    toast('Failed to submit candidate', 'error');
+  }
+  btn.disabled = false; btn.textContent = 'Submit & Score Candidate';
+}
+
+async function loadLeaderboard() {
+  document.getElementById('leaderboard-body').innerHTML = '<div class="empty">Loading...</div>';
+  try {
+    const res = await fetch(`${API}/candidates/ranked`);
+    const data = await res.json();
+
+    if (!data.length) {
+      document.getElementById('leaderboard-body').innerHTML = '<div class="empty">No candidates yet</div>';
+      return;
+    }
+
+    document.getElementById('stat-total').textContent = data.length;
+    const avg = (data.reduce((s, c) => s + c.score, 0) / data.length).toFixed(1);
+    document.getElementById('stat-avg').textContent = avg;
+    document.getElementById('stat-top').textContent = data[0].name.split(' ')[0];
+
+    const rows = data.map((c, i) => {
+      const scoreClass = c.score >= 7 ? 'score-high' : c.score >= 5 ? 'score-mid' : 'score-low';
+      const rankClass = i < 3 ? 'rank top' : 'rank';
+      const verdictHtml = c.interview_verdict
+        ? `<span class="verdict-badge verdict-${c.interview_verdict}">${c.interview_verdict}</span>`
+        : '<span style="color:var(--muted);font-size:12px;">—</span>';
+      const hiredHtml = c.hired === true
+        ? `<span class="verdict-badge verdict-strong">Hired</span>`
+        : c.hired === false
+        ? `<span class="verdict-badge verdict-weak">Rejected</span>`
+        : `<button class="btn-hire" onclick="recordFeedback('${c.id}', true)">✓ Hire</button>
+           <button class="btn-reject" onclick="recordFeedback('${c.id}', false)">✗ Reject</button>`;
+      return `<tr>
+        <td><span class="${rankClass}">#${i+1}</span></td>
+        <td>${c.name}</td>
+        <td>${c.email}</td>
+        <td><span class="score-badge ${scoreClass}">${c.score}/10</span></td>
+        <td>${verdictHtml}</td>
+        <td>${hiredHtml}</td>
+        <td><button class="btn-interview" onclick="goInterview('${c.id}')">Interview →</button></td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('leaderboard-body').innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Rank</th><th>Name</th><th>Email</th><th>Score</th><th>Verdict</th><th>Decision</th><th>Action</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  } catch (e) {
+    document.getElementById('leaderboard-body').innerHTML = '<div class="empty">Failed to load</div>';
+  }
+}
+
+function goInterview(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-interview').classList.add('active');
+  document.querySelectorAll('.nav-tab')[2].classList.add('active');
+  document.getElementById('interview-candidate-id').value = id;
+  startInterview();
+}
+
+function startInterview() {
+  const id = document.getElementById('interview-candidate-id').value.trim();
+  if (!id) return toast('Enter a candidate ID', 'error');
+  activeCandidateId = id;
+  document.getElementById('chat-box').innerHTML = '';
+  document.getElementById('chat-input').disabled = false;
+  document.getElementById('send-btn').disabled = false;
+  appendMsg('bot', "Hello! I'm your GenoTek interviewer. Let's begin. Say hi when you're ready!");
+}
+
+function appendMsg(role, text) {
+  const box = document.getElementById('chat-box');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `
+    <div class="msg-avatar">${role === 'bot' ? 'AI' : 'U'}</div>
+    <div class="msg-bubble">${text.replace(/\n/g, '<br/>')}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function recordFeedback(id, hired) {
+  try {
+    await fetch(`${API}/feedback`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ candidate_id: id, hired })
+    });
+    toast(hired ? '✓ Marked as Hired' : '✗ Marked as Rejected');
+    loadLeaderboard();
+  } catch (e) {
+    toast('Failed to record feedback', 'error');
+  }
+}
+
+async function uploadCSV() {
+  const file = document.getElementById('csv-file').files[0];
+  if (!file) return toast('Select a CSV file first', 'error');
+  const form = new FormData();
+  form.append('file', file);
+  document.getElementById('csv-result').textContent = 'Uploading...';
+  try {
+    const res = await fetch(`${API}/candidates/bulk`, { method: 'POST', body: form });
+    const data = await res.json();
+    document.getElementById('csv-result').textContent = `✓ ${data.saved} candidates saved. ${data.errors.length} errors.`;
+    toast(`✓ ${data.saved} candidates imported`);
+  } catch (e) {
+    document.getElementById('csv-result').textContent = 'Upload failed.';
+    toast('Upload failed', 'error');
+  }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg || !activeCandidateId) return;
+  input.value = '';
+  appendMsg('user', msg);
+
+  const typing = document.createElement('div');
+  typing.className = 'typing'; typing.textContent = 'Interviewer is typing...';
+  document.getElementById('chat-box').appendChild(typing);
+
+  try {
+    const res = await fetch(`${API}/interview`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ candidate_id: activeCandidateId, message: msg })
+    });
+    const data = await res.json();
+    typing.remove();
+    appendMsg('bot', data.reply);
+  } catch (e) {
+    typing.remove();
+    appendMsg('bot', 'Error connecting to server.');
+  }
+}
+</script>
+</body>
+</html>
